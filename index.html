@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>傩面 NUO｜元宇宙数字驱邪仪式</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Space+Grotesk:wght@500;700&display=swap');
@@ -20,161 +19,152 @@
         }
        
         .glass { 
-            background: rgba(15,15,25,0.92); 
+            background: rgba(15,15,25,0.95); 
             backdrop-filter: blur(40px); 
             border: 1px solid rgba(255,255,255,0.1); 
         }
        
         .neon-gold { text-shadow: 0 0 30px var(--gold); }
        
-        .author-card { transition: all 0.3s cubic-bezier(0.68,-0.55,0.27,1.55); }
-        .author-card:hover { transform: scale(1.05); box-shadow: 0 0 25px var(--gold); }
-       
         .boss-container { animation: boss-float 3s ease-in-out infinite; }
-        @keyframes boss-float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-18px)} }
-       
-        .particle { position:absolute; width:8px; height:8px; border-radius:50%; animation:particle-float 1.4s ease-out forwards; }
-        @keyframes particle-float { 0%{transform:scale(1)translate(0,0);opacity:1} 100%{transform:scale(0)translate(var(--x),var(--y));opacity:0} }
-       
-        .slash { position:absolute; width:6px; height:220px; background:linear-gradient(transparent,#fff,transparent); box-shadow:0 0 50px #fff; animation:slash-anim 0.45s ease-out forwards; }
-        @keyframes slash-anim { 0%{transform:rotate(-65deg)scaleY(0);opacity:0} 100%{transform:rotate(65deg)scaleY(2);opacity:0} }
+        @keyframes boss-float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
        
         .tab-active { border-bottom:4px solid var(--gold); color:var(--gold); }
-       
-        /* 手机优化样式 */
-        .nav-tabs {
-            scrollbar-width: none;
-        }
-        .nav-tabs::-webkit-scrollbar {
-            display: none;
+        .bottom-tab-active { color: var(--gold); transform: scale(1.15); }
+        
+        /* 手机专属优化 */
+        @media (max-width: 768px) {
+            .boss-visual { width: 280px !important; height: 280px !important; }
+            .action-btn { min-height: 88px; } /* 符合苹果人机44px×2安全区 */
         }
         
-        .action-btn {
-            transition: all 0.2s ease;
-        }
-        .action-btn:active {
-            transform: scale(0.95);
-        }
-        
-        /* 手机端鬼怪卡片更紧凑 */
-        @media (max-width: 640px) {
-            .ghost-card {
-                flex-direction: row;
-                padding: 12px;
-            }
+        .bottom-nav {
+            box-shadow: 0 -4px 30px rgba(0,0,0,0.6);
         }
     </style>
 </head>
-<body class="min-h-screen pb-20">
-<!-- 智能导航栏（手机端横向滚动 + 更紧凑） -->
+<body class="min-h-screen pb-24 md:pb-0">
+
+<!-- 顶部导航栏（桌面保留原横向标签，手机仅显示Logo+音量） -->
 <nav id="smart-nav" class="fixed top-0 left-0 right-0 z-50 glass border-b border-white/10 transition-transform duration-300 ease-in-out">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-        <!-- Logo + 标题（手机端缩小） -->
-        <div class="flex items-center gap-3 flex-shrink-0">
-            <img src="傩面前-07.png" class="w-14 h-14 sm:w-16 sm:h-16 object-contain drop-shadow-2xl">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+        <!-- Logo -->
+        <div class="flex items-center gap-3">
+            <img src="傩面前-07.png" class="w-14 h-14 object-contain drop-shadow-2xl">
             <div>
-                <h1 class="text-2xl sm:text-3xl font-bold tracking-tighter neon-gold">傩面 NUO</h1>
-                <p class="text-[10px] sm:text-xs tracking-widest text-white/50 -mt-1">沉浸式数字驱邪仪式 · 2024</p>
+                <h1 class="text-2xl font-bold tracking-tighter neon-gold">傩面 NUO</h1>
+                <p class="text-[10px] tracking-widest text-white/50">沉浸式数字驱邪仪式 · 2024</p>
             </div>
         </div>
-       
-        <!-- 导航按钮（手机端横向滚动） -->
-        <div class="flex gap-2 sm:gap-4 md:gap-9 text-xs sm:text-sm font-medium overflow-x-auto nav-tabs pb-1 flex-nowrap max-w-[calc(100%-180px)]">
-            <button onclick="switchTab(0)" class="tab-btn tab-active px-4 py-2.5 whitespace-nowrap hover:text-white transition flex-shrink-0">仪式场</button>
-            <button onclick="switchTab(1)" class="tab-btn px-4 py-2.5 whitespace-nowrap hover:text-white transition flex-shrink-0">传统文化</button>
-            <button onclick="switchTab(2)" class="tab-btn px-4 py-2.5 whitespace-nowrap hover:text-white transition flex-shrink-0">疫鬼调研</button>
-            <button onclick="switchTab(3)" class="tab-btn px-4 py-2.5 whitespace-nowrap hover:text-white transition flex-shrink-0">设计映射</button>
-            <button onclick="switchTab(4)" class="tab-btn px-4 py-2.5 whitespace-nowrap hover:text-white transition flex-shrink-0">玩法机制</button>
-            <button onclick="switchTab(5)" class="tab-btn px-4 py-2.5 whitespace-nowrap hover:text-white transition flex-shrink-0">视觉设计</button>
+
+        <!-- 桌面标签（手机隐藏） -->
+        <div class="hidden md:flex gap-8 text-sm font-medium">
+            <button onclick="switchTab(0)" class="tab-btn tab-active px-5 py-3 hover:text-white transition">仪式场</button>
+            <button onclick="switchTab(1)" class="tab-btn px-5 py-3 hover:text-white transition">传统文化</button>
+            <button onclick="switchTab(2)" class="tab-btn px-5 py-3 hover:text-white transition">疫鬼调研</button>
+            <button onclick="switchTab(3)" class="tab-btn px-5 py-3 hover:text-white transition">设计映射</button>
+            <button onclick="switchTab(4)" class="tab-btn px-5 py-3 hover:text-white transition">玩法机制</button>
+            <button onclick="switchTab(5)" class="tab-btn px-5 py-3 hover:text-white transition">视觉设计</button>
         </div>
-       
-        <!-- 作者 + 音量（手机端更紧凑） -->
-        <div class="flex items-center gap-3 flex-shrink-0">
-            <div onclick="toggleSound()" class="cursor-pointer w-9 h-9 glass rounded-2xl flex items-center justify-center hover:scale-110 transition">
-                <i id="sound-icon" class="fas fa-volume-up text-xl"></i>
+
+        <!-- 音量 + 作者（手机只保留音量） -->
+        <div class="flex items-center gap-4">
+            <div onclick="toggleSound()" class="cursor-pointer w-10 h-10 glass rounded-2xl flex items-center justify-center hover:scale-110 transition">
+                <i id="sound-icon" class="fas fa-volume-up text-2xl"></i>
             </div>
-            
-            <!-- 作者卡片手机端隐藏，点击可弹出（简单处理） -->
-            <div onclick="showAuthorInfo()" class="author-card glass px-4 py-2 rounded-3xl text-xs flex flex-col items-end cursor-pointer md:flex hidden">
-                <div class="flex items-center gap-2 text-gold font-medium">
-                    <i class="fas fa-user"></i>
-                    <span>吴启杭</span>
-                </div>
+            <div onclick="showAuthorInfo()" class="author-card glass px-5 py-2 rounded-3xl text-xs cursor-pointer hidden md:flex flex-col items-end">
+                <span class="text-gold font-medium">吴启杭</span>
             </div>
         </div>
     </div>
 </nav>
 
-<script>
-function adjustNavOffset() {
-    const nav = document.querySelector('nav');
-    if (!nav) return;
-    const height = nav.getBoundingClientRect().height;
-    document.body.style.paddingTop = height + 'px';
-}
-window.addEventListener('DOMContentLoaded', adjustNavOffset);
-window.addEventListener('resize', adjustNavOffset);
-</script>
+<!-- 手机底部导航栏（核心交互优化） -->
+<div id="bottom-nav" class="fixed bottom-0 left-0 right-0 z-50 md:hidden glass border-t border-white/10 bottom-nav">
+    <div class="flex justify-around items-center py-2 max-w-md mx-auto">
+        <button onclick="switchTab(0)" class="bottom-tab flex flex-col items-center gap-1 text-[10px] transition-all active:scale-95" data-tab="0">
+            <i class="fas fa-mask text-2xl"></i>
+            <span>仪式场</span>
+        </button>
+        <button onclick="switchTab(1)" class="bottom-tab flex flex-col items-center gap-1 text-[10px] transition-all active:scale-95" data-tab="1">
+            <i class="fas fa-book text-2xl"></i>
+            <span>传统文化</span>
+        </button>
+        <button onclick="switchTab(2)" class="bottom-tab flex flex-col items-center gap-1 text-[10px] transition-all active:scale-95" data-tab="2">
+            <i class="fas fa-skull text-2xl"></i>
+            <span>疫鬼调研</span>
+        </button>
+        <button onclick="switchTab(3)" class="bottom-tab flex flex-col items-center gap-1 text-[10px] transition-all active:scale-95" data-tab="3">
+            <i class="fas fa-project-diagram text-2xl"></i>
+            <span>设计映射</span>
+        </button>
+        <button onclick="switchTab(4)" class="bottom-tab flex flex-col items-center gap-1 text-[10px] transition-all active:scale-95" data-tab="4">
+            <i class="fas fa-gamepad text-2xl"></i>
+            <span>玩法机制</span>
+        </button>
+        <button onclick="switchTab(5)" class="bottom-tab flex flex-col items-center gap-1 text-[10px] transition-all active:scale-95" data-tab="5">
+            <i class="fas fa-palette text-2xl"></i>
+            <span>视觉设计</span>
+        </button>
+    </div>
+</div>
 
-<!-- 主内容区域 -->
-<div class="max-w-7xl mx-auto px-4 sm:px-6 pt-4">
-    
-    <!-- TAB 0：仪式场（手机端垂直堆叠 + 更大触控区域） -->
+<div class="max-w-7xl mx-auto px-4 pt-4">
+    <!-- TAB 0：仪式场（进一步加大触控区 + 手机振动反馈） -->
     <div id="tab-0" class="tab-content">
-        <div class="grid grid-cols-1 md:grid-cols-12 gap-6 lg:gap-8">
-            
-            <!-- 左侧疫鬼图鉴（手机端置顶，卡片更紧凑） -->
-            <div class="md:col-span-3 order-2 md:order-1">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+            <!-- 疫鬼图鉴（手机端紧凑垂直） -->
+            <div class="md:col-span-3">
                 <div class="glass rounded-3xl p-5 sticky md:top-28">
                     <h2 class="text-xl font-semibold mb-5 flex items-center gap-3">👁️ 现代疫鬼图鉴</h2>
                     <div id="ghost-list" class="space-y-3"></div>
                 </div>
             </div>
-           
-            <!-- 中央仪式舞台（手机端更宽松，Boss更大触控） -->
-            <div class="md:col-span-6 order-1 md:order-2">
-                <div class="glass rounded-3xl p-5 sm:p-8 min-h-[520px] md:h-[680px] flex flex-col">
+
+            <!-- 中央仪式舞台 -->
+            <div class="md:col-span-6">
+                <div class="glass rounded-3xl p-5 sm:p-8 min-h-[520px] flex flex-col">
                     <div class="text-center mb-6">
-                        <div id="stage" class="inline px-6 py-1.5 bg-white/10 rounded-full text-[10px] sm:text-xs tracking-widest">STAGE 01 — 降神诊断</div>
-                        <h1 id="boss-name" class="text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter neon-gold mt-4">金嗜·吞初</h1>
-                        <p id="boss-desc" class="text-white/60 mt-2 text-sm sm:text-base">平均屏幕时间 > 6.5h</p>
+                        <div id="stage" class="inline px-6 py-1.5 bg-white/10 rounded-full text-xs tracking-widest">STAGE 01 — 降神诊断</div>
+                        <h1 id="boss-name" class="text-4xl sm:text-5xl font-black tracking-tighter neon-gold mt-4">金嗜·吞秒</h1>
+                        <p id="boss-desc" class="text-white/60 mt-2 text-sm">平均屏幕时间 > 6.5h</p>
                     </div>
-                   
-                    <div class="flex-1 relative flex items-center justify-center" id="boss-area">
-                        <div id="boss-visual" class="boss-container w-[260px] h-[260px] sm:w-[300px] sm:h-[300px] md:w-[380px] md:h-[380px] relative mx-auto"></div>
+
+                    <div class="flex-1 relative flex items-center justify-center cursor-pointer" id="boss-area" onclick="quickTapBoss()">
+                        <div id="boss-visual" class="boss-container boss-visual w-[280px] h-[280px] sm:w-[320px] sm:h-[320px] relative"></div>
                         <div id="slash-layer" class="absolute inset-0 pointer-events-none"></div>
                     </div>
-                   
-                    <!-- 操作按钮（手机端2列排列，触控更友好） -->
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-                        <button onclick="performAction(0)" class="action-btn glass rounded-3xl py-6 md:py-7 hover:scale-110 transition flex flex-col items-center gap-3 active:scale-95">
-                            <i class="fas fa-bolt text-4xl text-yellow-400"></i>
-                            <span class="text-xs sm:text-sm">震慑 / 抖动</span>
+
+                    <!-- 操作按钮（手机2列，超大触控） -->
+                    <div class="grid grid-cols-2 gap-4 mt-6">
+                        <button onclick="performAction(0)" class="action-btn glass rounded-3xl py-7 text-sm flex flex-col items-center gap-3 active:scale-95">
+                            <i class="fas fa-bolt text-5xl text-yellow-400"></i>
+                            <span>震慑 / 抖动</span>
                         </button>
-                        <button onclick="performAction(1)" class="action-btn glass rounded-3xl py-6 md:py-7 hover:scale-110 transition flex flex-col items-center gap-3 active:scale-95">
-                            <i class="fas fa-hands text-4xl text-cyan-400"></i>
-                            <span class="text-xs sm:text-sm">祈福 / 舒展</span>
+                        <button onclick="performAction(1)" class="action-btn glass rounded-3xl py-7 text-sm flex flex-col items-center gap-3 active:scale-95">
+                            <i class="fas fa-hands text-5xl text-cyan-400"></i>
+                            <span>祈福 / 舒展</span>
                         </button>
-                        <button onclick="performAction(2)" class="action-btn glass rounded-3xl py-6 md:py-7 hover:scale-110 transition flex flex-col items-center gap-3 active:scale-95">
-                            <i class="fas fa-shoe-prints text-4xl text-purple-400"></i>
-                            <span class="text-xs sm:text-sm">节律 / 踏步</span>
+                        <button onclick="performAction(2)" class="action-btn glass rounded-3xl py-7 text-sm flex flex-col items-center gap-3 active:scale-95">
+                            <i class="fas fa-shoe-prints text-5xl text-purple-400"></i>
+                            <span>节律 / 踏步</span>
                         </button>
-                        <button onclick="performAction(3)" class="action-btn glass rounded-3xl py-6 md:py-7 hover:scale-110 transition flex flex-col items-center gap-3 active:scale-95">
-                            <i class="fas fa-sword text-4xl text-red-400"></i>
-                            <span class="text-xs sm:text-sm">开路 / 劈砍</span>
+                        <button onclick="performAction(3)" class="action-btn glass rounded-3xl py-7 text-sm flex flex-col items-center gap-3 active:scale-95">
+                            <i class="fas fa-sword text-5xl text-red-400"></i>
+                            <span>开路 / 劈砍</span>
                         </button>
                     </div>
-                   
+
                     <button onclick="startRitual()" id="ritual-btn"
-                        class="mt-8 w-full py-6 md:py-7 bg-gradient-to-r from-yellow-400 via-orange-400 to-amber-500 text-black font-black text-2xl md:text-3xl rounded-3xl shadow-2xl hover:brightness-125 active:scale-95 transition">
+                        class="mt-8 w-full py-7 bg-gradient-to-r from-yellow-400 via-orange-400 to-amber-500 text-black font-black text-3xl rounded-3xl active:scale-95 transition">
                         执行具身驱邪仪式
                     </button>
                 </div>
             </div>
-           
-            <!-- 右侧已净化资产（手机端置底） -->
-            <div class="md:col-span-3 order-3">
-                <div class="glass rounded-3xl p-5 h-full flex flex-col">
+
+            <!-- 已净化资产 -->
+            <div class="md:col-span-3">
+                <div class="glass rounded-3xl p-5 flex flex-col h-full">
                     <h2 class="text-xl font-semibold mb-5">已净化数字资产</h2>
                     <div id="asset-gallery" class="flex-1 grid grid-cols-2 gap-4"></div>
                     <div class="mt-auto pt-8">
@@ -189,62 +179,31 @@ window.addEventListener('resize', adjustNavOffset);
         </div>
     </div>
 
-    <!-- 其他 TAB（手机端已自动适配，图片全宽） -->
-    <div id="tab-1" class="tab-content hidden">
-        <div class="glass rounded-3xl p-4 sm:p-8 max-w-6xl mx-auto">
-            <img src="未标题-2-02.png" class="w-full rounded-3xl shadow-2xl">
-            <p class="text-center mt-6 text-xs sm:text-sm opacity-75">一 · 传统文化（原PDF第2页完整可视化）</p>
-        </div>
-    </div>
-    <div id="tab-2" class="tab-content hidden">
-        <div class="glass rounded-3xl p-4 sm:p-8 max-w-6xl mx-auto">
-            <img src="未标题-2-03.png" class="w-full rounded-3xl shadow-2xl">
-            <p class="text-center mt-6 text-xs sm:text-sm opacity-75">二 · 现代疫鬼调研（原PDF第3页完整可视化）</p>
-        </div>
-    </div>
-    <div id="tab-3" class="tab-content hidden">
-        <div class="glass rounded-3xl p-4 sm:p-8 max-w-6xl mx-auto">
-            <img src="未标题-1-04.jpg" class="w-full rounded-3xl shadow-2xl">
-            <p class="text-center mt-6 text-xs sm:text-sm opacity-75">三 · 设计映射逻辑（原PDF第4页完整可视化）</p>
-        </div>
-    </div>
-    <div id="tab-4" class="tab-content hidden">
-        <div class="glass rounded-3xl p-4 sm:p-8 max-w-6xl mx-auto">
-            <img src="未标题-1-05.jpg" class="w-full rounded-3xl shadow-2xl">
-            <p class="text-center mt-6 text-xs sm:text-sm opacity-75">四 · 核心玩法机制（原PDF第5页完整可视化）</p>
-        </div>
-    </div>
-    <div id="tab-5" class="tab-content hidden">
-        <div class="glass rounded-3xl p-4 sm:p-8 max-w-6xl mx-auto">
-            <img src="未标题-1-06.jpg" class="w-full rounded-3xl shadow-2xl">
-            <p class="text-center mt-6 text-xs sm:text-sm opacity-75">五 · 项目视觉设计（原PDF第6页完整可视化）</p>
-        </div>
+    <!-- 其余TAB保持全宽适配 -->
+    <div id="tab-1" class="tab-content hidden"><div class="glass rounded-3xl p-4 max-w-6xl mx-auto"><img src="未标题-2-02.png" class="w-full rounded-3xl"><p class="text-center mt-4 text-xs opacity-75">一 · 传统文化</p></div></div>
+    <div id="tab-2" class="tab-content hidden"><div class="glass rounded-3xl p-4 max-w-6xl mx-auto"><img src="未标题-2-03.png" class="w-full rounded-3xl"><p class="text-center mt-4 text-xs opacity-75">二 · 现代疫鬼调研</p></div></div>
+    <div id="tab-3" class="tab-content hidden"><div class="glass rounded-3xl p-4 max-w-6xl mx-auto"><img src="未标题-1-04.jpg" class="w-full rounded-3xl"><p class="text-center mt-4 text-xs opacity-75">三 · 设计映射逻辑</p></div></div>
+    <div id="tab-4" class="tab-content hidden"><div class="glass rounded-3xl p-4 max-w-6xl mx-auto"><img src="未标题-1-05.jpg" class="w-full rounded-3xl"><p class="text-center mt-4 text-xs opacity-75">四 · 核心玩法机制</p></div></div>
+    <div id="tab-5" class="tab-content hidden"><div class="glass rounded-3xl p-4 max-w-6xl mx-auto"><img src="未标题-1-06.jpg" class="w-full rounded-3xl"><p class="text-center mt-4 text-xs opacity-75">五 · 项目视觉设计</p></div></div>
+</div>
+
+<!-- 胜利弹窗 -->
+<div id="win-modal" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center z-[60] px-4">
+    <div class="glass rounded-3xl p-10 max-w-md w-full text-center">
+        <div class="text-8xl mb-6">🪔✨</div>
+        <h2 class="text-5xl font-black">仪式圆满！</h2>
+        <p class="my-6 text-lg">四大精神疫鬼已被傩舞彻底驱散</p>
+        <button onclick="restartAll()" class="w-full py-6 bg-white text-black font-black text-3xl rounded-3xl active:scale-95">再次进入元宇宙</button>
     </div>
 </div>
 
-<!-- 胜利弹窗（手机端更大更友好） -->
-<div id="win-modal" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center z-50 px-4">
-    <div class="glass rounded-3xl p-10 sm:p-16 text-center max-w-md w-full">
-        <div class="text-7xl mb-8">🪔✨</div>
-        <h2 class="text-4xl sm:text-5xl font-black">仪式圆满！</h2>
-        <p class="my-8 text-lg sm:text-xl">四大精神疫鬼已被傩舞彻底驱散</p>
-        <button onclick="restartAll()" class="w-full sm:w-auto px-14 py-6 bg-white text-black rounded-3xl font-black text-2xl active:scale-95 transition">
-            再次进入元宇宙
-        </button>
-    </div>
-</div>
-
-<!-- 作者信息弹窗（手机端专用） -->
-<div id="author-modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50 px-4">
+<!-- 作者弹窗（手机专用） -->
+<div id="author-modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-[60] px-4">
     <div class="glass rounded-3xl p-8 max-w-xs w-full text-center">
-        <div class="text-gold text-2xl mb-4">吴启杭</div>
-        <a href="mailto:3029833102@qq.com" class="block py-3 text-cyan-400 hover:underline flex items-center justify-center gap-2">
-            <i class="fas fa-envelope"></i> 3029833102@qq.com
-        </a>
-        <a href="tel:15779133734" class="block py-3 text-cyan-400 hover:underline flex items-center justify-center gap-2">
-            <i class="fas fa-phone"></i> 15779133734
-        </a>
-        <button onclick="hideAuthorModal()" class="mt-6 text-white/60 text-sm">关闭</button>
+        <div class="text-3xl text-gold mb-6">吴启杭</div>
+        <a href="mailto:3029833102@qq.com" class="block py-4 text-cyan-300 flex items-center justify-center gap-3 text-lg"><i class="fas fa-envelope"></i> 3029833102@qq.com</a>
+        <a href="tel:15779133734" class="block py-4 text-cyan-300 flex items-center justify-center gap-3 text-lg"><i class="fas fa-phone"></i> 15779133734</a>
+        <button onclick="hideAuthorModal()" class="mt-8 text-white/60">关闭</button>
     </div>
 </div>
 
@@ -258,20 +217,20 @@ window.addEventListener('resize', adjustNavOffset);
         {id:3, name:"匿鳞·银障", color:"#888888", img:"12.png", desc:"SAD影响1500万成人|超61%年轻人感到孤独", energy:15, action:3, asset:"治愈音色"}
     ]
    
-    let currentGhost = 0, health = 100, purified = [], soundEnabled = true
-   
+    let currentGhost = 0, health = 100, purified = [], soundEnabled = true, currentTab = 0
+
     function createGhostCards() {
         const container = document.getElementById('ghost-list')
         container.innerHTML = ''
         ghosts.forEach((g,i) => {
             const purifiedFlag = purified.includes(i)
             const div = document.createElement('div')
-            div.className = `ghost-card glass rounded-3xl p-5 flex gap-4 items-center cursor-pointer hover:ring-2 hover:ring-yellow-400 transition ${currentGhost===i?'ring-2 ring-yellow-400':''} ${purifiedFlag?'opacity-40':''}`
+            div.className = `glass rounded-3xl p-5 flex gap-4 items-center cursor-pointer hover:ring-2 hover:ring-yellow-400 transition ${currentGhost===i?'ring-2 ring-yellow-400':''} ${purifiedFlag?'opacity-40':''}`
             div.innerHTML = `
                 <img src="${g.img}" class="w-16 h-16 object-contain rounded-2xl flex-shrink-0">
-                <div class="flex-1 min-w-0">
-                    <div class="font-semibold text-sm truncate">${g.name}</div>
-                    <div class="text-[10px] text-white/60 line-clamp-2">${g.desc}</div>
+                <div class="flex-1">
+                    <div class="font-semibold">${g.name}</div>
+                    <div class="text-xs text-white/60 line-clamp-2">${g.desc}</div>
                 </div>
             `
             div.onclick = () => { if(!purifiedFlag){ currentGhost=i; loadCurrentGhost() }}
@@ -283,13 +242,19 @@ window.addEventListener('resize', adjustNavOffset);
         const g = ghosts[currentGhost]
         document.getElementById('boss-name').textContent = g.name
         document.getElementById('boss-desc').textContent = g.desc
-        document.getElementById('boss-visual').innerHTML = `<img src="${g.img}" class="w-full h-full object-contain drop-shadow-[0_0_60px_${g.color}]">`
+        document.getElementById('boss-visual').innerHTML = `<img src="${g.img}" class="w-full h-full object-contain drop-shadow-[0_0_80px_${g.color}]">`
         health = 100
     }
    
     function performAction(act) {
         const g = ghosts[currentGhost]
         const correct = g.action === act
+        
+        // 手机振动反馈（强烈优化交互）
+        if (navigator.vibrate) {
+            navigator.vibrate(correct ? [80, 40, 120] : [50])
+        }
+        
         if(soundEnabled){
             const ctx = new AudioContext()
             const osc = ctx.createOscillator()
@@ -298,11 +263,19 @@ window.addEventListener('resize', adjustNavOffset);
             osc.start()
             setTimeout(()=>osc.stop(),90)
         }
+        
         if(correct){
-            health = Math.max(health-26, 0)
+            health = Math.max(health-28, 0)
             if(health<=0) defeatGhost()
         } else {
-            health = Math.max(health-9, 0)
+            health = Math.max(health-10, 0)
+        }
+    }
+   
+    function quickTapBoss() {
+        // 手机额外交互：直接点击Boss可随机执行一次震慑
+        if (window.innerWidth <= 768) {
+            performAction(0)
         }
     }
    
@@ -320,7 +293,8 @@ window.addEventListener('resize', adjustNavOffset);
         document.getElementById('progress-text').textContent = prog+'%'
        
         if(purified.length===4){
-            setTimeout(()=>document.getElementById('win-modal').classList.remove('hidden'),900)
+            setTimeout(()=>document.getElementById('win-modal').classList.remove('hidden'),800)
+            if (navigator.vibrate) navigator.vibrate([200,100,200,100,300])
         } else {
             for(let i=0;i<4;i++) if(!purified.includes(i)){currentGhost=i; loadCurrentGhost();break}
         }
@@ -331,13 +305,22 @@ window.addEventListener('resize', adjustNavOffset);
         const btn = document.getElementById('ritual-btn')
         btn.innerHTML = '仪式进行中...'
         btn.disabled = true
+        if (navigator.vibrate) navigator.vibrate(60)
         setTimeout(()=>{btn.innerHTML='执行具身驱邪仪式';btn.disabled=false; performAction(ghosts[currentGhost].action)},520)
     }
    
     function switchTab(n){
+        currentTab = n
         document.querySelectorAll('.tab-content').forEach(el=>el.classList.add('hidden'))
         document.getElementById('tab-'+n).classList.remove('hidden')
+        
+        // 桌面标签高亮
         document.querySelectorAll('.tab-btn').forEach((b,i)=>i===n?b.classList.add('tab-active'):b.classList.remove('tab-active'))
+        
+        // 手机底部导航高亮
+        document.querySelectorAll('.bottom-tab').forEach(btn => {
+            btn.classList.toggle('bottom-tab-active', parseInt(btn.dataset.tab) === n)
+        })
     }
    
     function toggleSound(){
@@ -359,31 +342,26 @@ window.addEventListener('resize', adjustNavOffset);
         switchTab(0)
     }
    
-    function showAuthorInfo(){
-        document.getElementById('author-modal').classList.remove('hidden')
-    }
-    function hideAuthorModal(){
-        document.getElementById('author-modal').classList.add('hidden')
-    }
+    function showAuthorInfo(){ document.getElementById('author-modal').classList.remove('hidden') }
+    function hideAuthorModal(){ document.getElementById('author-modal').classList.add('hidden') }
    
-    // 智能滚动导航栏（保持原逻辑）
-    let lastScrollY = window.scrollY;
-    const smartNav = document.getElementById('smart-nav');
+    // 智能导航隐藏（向下滚动隐藏顶部）
+    let lastScrollY = 0
+    const smartNav = document.getElementById('smart-nav')
     window.addEventListener('scroll', () => {
-        const currentScrollY = window.scrollY;
-        if (currentScrollY > lastScrollY && currentScrollY > 80) {
-            smartNav.classList.add('-translate-y-full');
+        const current = window.scrollY
+        if (current > lastScrollY && current > 100) {
+            smartNav.style.transform = 'translateY(-100%)'
         } else {
-            smartNav.classList.remove('-translate-y-full');
+            smartNav.style.transform = 'translateY(0)'
         }
-        lastScrollY = currentScrollY;
-    });
+        lastScrollY = current
+    })
    
     window.onload = () => {
         createGhostCards()
         loadCurrentGhost()
-        switchTab(0)
-        // 手机端默认显示仪式场
+        switchTab(0)  // 默认仪式场
     }
 </script>
 </body>
