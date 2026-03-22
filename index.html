@@ -31,29 +31,77 @@
        
         .tab-active { border-bottom:4px solid var(--gold); color:var(--gold); }
         .bottom-tab-active { color: var(--gold); transform: scale(1.15); }
-        
-        /* 手机专属优化 */
-        @media (max-width: 768px) {
-            .boss-visual { width: 280px !important; height: 280px !important; }
-            .action-btn { min-height: 88px; }
+
+        /* 新增：摇一摇专属特效动画关键帧 */
+        @keyframes shake-flash {
+            0% { transform: scale(0.6) rotate(-15deg); opacity: 0; }
+            30% { transform: scale(1.15) rotate(8deg); }
+            60% { transform: scale(0.95) rotate(-6deg); }
+            100% { transform: scale(1) rotate(0); opacity: 1; }
         }
-        
+        @keyframes holo-shift {
+            0% { filter: hue-rotate(0deg) saturate(1.8); }
+            100% { filter: hue-rotate(360deg) saturate(1.8); }
+        }
+        @keyframes shine {
+            0% { transform: translateX(-150%); }
+            100% { transform: translateX(300%); }
+        }
+
+        /* 净化资产卡片（完全复刻你提供的图样式） */
+        .fancy-asset {
+            position: relative;
+            overflow: hidden;
+            border-radius: 24px;
+            height: 118px;
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            border-left: 10px solid;
+            transition: all 0.4s cubic-bezier(0.34,1.56,0.64,1);
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.6);
+        }
+        .fancy-asset::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            opacity: 0.25;
+            z-index: 1;
+            background: inherit;
+        }
+        .fancy-asset .shine {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(120deg, transparent, rgba(255,255,255,0.6), transparent);
+            animation: shine 2.5s linear infinite;
+            z-index: 2;
+        }
+
+        /* 四个不同主题背景（精确匹配你图片） */
+        .asset-0 { background: linear-gradient(135deg, #3a2a00, #f2cc60); } /* 金箔粒子 */
+        .asset-1 { background: linear-gradient(135deg, #00f2ff, #bf77ff, #f2cc60); animation: holo-shift 6s linear infinite; } /* 全息面具 */
+        .asset-2 { background: linear-gradient(135deg, #4a2a80, #bf77ff); } /* 对称纹样 */
+        .asset-3 { background: linear-gradient(135deg, #0a3a3a, #00f2ff); } /* 治愈音色 */
+
         .bottom-nav {
             box-shadow: 0 -4px 30px rgba(0,0,0,0.6);
         }
         
-        /* 修复顶部遮挡：动态padding */
         #main-content {
             transition: padding-top 0.3s ease;
+        }
+        
+        /* 摇一摇特效叠加层 */
+        #shake-effect {
+            animation: fadeInOut 1.8s forwards;
         }
     </style>
 </head>
 <body class="min-h-screen pb-24 md:pb-0">
 
-<!-- 顶部导航栏 -->
+<!-- 顶部导航栏（保持不变） -->
 <nav id="smart-nav" class="fixed top-0 left-0 right-0 z-50 glass border-b border-white/10 transition-transform duration-300 ease-in-out">
     <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-        <!-- Logo -->
         <div class="flex items-center gap-3">
             <img src="傩面前-07.png" class="w-14 h-14 object-contain drop-shadow-2xl">
             <div>
@@ -61,8 +109,6 @@
                 <p class="text-[10px] tracking-widest text-white/50">沉浸式数字驱邪仪式 · 2024</p>
             </div>
         </div>
-
-        <!-- 桌面标签 -->
         <div class="hidden md:flex gap-8 text-sm font-medium">
             <button onclick="switchTab(0)" class="tab-btn tab-active px-5 py-3 hover:text-white transition">仪式场</button>
             <button onclick="switchTab(1)" class="tab-btn px-5 py-3 hover:text-white transition">传统文化</button>
@@ -71,19 +117,13 @@
             <button onclick="switchTab(4)" class="tab-btn px-5 py-3 hover:text-white transition">玩法机制</button>
             <button onclick="switchTab(5)" class="tab-btn px-5 py-3 hover:text-white transition">视觉设计</button>
         </div>
-
-        <!-- 音量 + 作者图标（手机和桌面都可见） -->
         <div class="flex items-center gap-3">
             <div onclick="toggleSound()" class="cursor-pointer w-10 h-10 glass rounded-2xl flex items-center justify-center hover:scale-110 transition">
                 <i id="sound-icon" class="fas fa-volume-up text-2xl"></i>
             </div>
-            
-            <!-- 手机作者图标 -->
             <div onclick="showAuthorInfo()" class="cursor-pointer w-10 h-10 glass rounded-2xl flex items-center justify-center hover:scale-110 transition md:hidden">
                 <i class="fas fa-user text-xl text-gold"></i>
             </div>
-            
-            <!-- 桌面作者卡片 -->
             <div onclick="showAuthorInfo()" class="author-card glass px-5 py-2 rounded-3xl text-xs cursor-pointer hidden md:flex flex-col items-end">
                 <span class="text-gold font-medium">吴启杭</span>
             </div>
@@ -94,28 +134,15 @@
 <!-- 手机底部导航栏 -->
 <div id="bottom-nav" class="fixed bottom-0 left-0 right-0 z-50 md:hidden glass border-t border-white/10 bottom-nav">
     <div class="flex justify-around items-center py-2 max-w-md mx-auto">
-        <button onclick="switchTab(0)" class="bottom-tab flex flex-col items-center gap-1 text-[10px] transition-all active:scale-95" data-tab="0">
-            <i class="fas fa-mask text-2xl"></i><span>仪式场</span>
-        </button>
-        <button onclick="switchTab(1)" class="bottom-tab flex flex-col items-center gap-1 text-[10px] transition-all active:scale-95" data-tab="1">
-            <i class="fas fa-book text-2xl"></i><span>传统文化</span>
-        </button>
-        <button onclick="switchTab(2)" class="bottom-tab flex flex-col items-center gap-1 text-[10px] transition-all active:scale-95" data-tab="2">
-            <i class="fas fa-skull text-2xl"></i><span>疫鬼调研</span>
-        </button>
-        <button onclick="switchTab(3)" class="bottom-tab flex flex-col items-center gap-1 text-[10px] transition-all active:scale-95" data-tab="3">
-            <i class="fas fa-project-diagram text-2xl"></i><span>设计映射</span>
-        </button>
-        <button onclick="switchTab(4)" class="bottom-tab flex flex-col items-center gap-1 text-[10px] transition-all active:scale-95" data-tab="4">
-            <i class="fas fa-gamepad text-2xl"></i><span>玩法机制</span>
-        </button>
-        <button onclick="switchTab(5)" class="bottom-tab flex flex-col items-center gap-1 text-[10px] transition-all active:scale-95" data-tab="5">
-            <i class="fas fa-palette text-2xl"></i><span>视觉设计</span>
-        </button>
+        <button onclick="switchTab(0)" class="bottom-tab flex flex-col items-center gap-1 text-[10px] transition-all active:scale-95" data-tab="0"><i class="fas fa-mask text-2xl"></i><span>仪式场</span></button>
+        <button onclick="switchTab(1)" class="bottom-tab flex flex-col items-center gap-1 text-[10px] transition-all active:scale-95" data-tab="1"><i class="fas fa-book text-2xl"></i><span>传统文化</span></button>
+        <button onclick="switchTab(2)" class="bottom-tab flex flex-col items-center gap-1 text-[10px] transition-all active:scale-95" data-tab="2"><i class="fas fa-skull text-2xl"></i><span>疫鬼调研</span></button>
+        <button onclick="switchTab(3)" class="bottom-tab flex flex-col items-center gap-1 text-[10px] transition-all active:scale-95" data-tab="3"><i class="fas fa-project-diagram text-2xl"></i><span>设计映射</span></button>
+        <button onclick="switchTab(4)" class="bottom-tab flex flex-col items-center gap-1 text-[10px] transition-all active:scale-95" data-tab="4"><i class="fas fa-gamepad text-2xl"></i><span>玩法机制</span></button>
+        <button onclick="switchTab(5)" class="bottom-tab flex flex-col items-center gap-1 text-[10px] transition-all active:scale-95" data-tab="5"><i class="fas fa-palette text-2xl"></i><span>视觉设计</span></button>
     </div>
 </div>
 
-<!-- 主内容（增加id用于动态padding） -->
 <div id="main-content" class="max-w-7xl mx-auto px-4">
 
     <!-- TAB 0：仪式场 -->
@@ -156,8 +183,7 @@
                         </button>
                     </div>
 
-                    <button onclick="startRitual()" id="ritual-btn"
-                        class="mt-8 w-full py-7 bg-gradient-to-r from-yellow-400 via-orange-400 to-amber-500 text-black font-black text-3xl rounded-3xl active:scale-95 transition">
+                    <button onclick="startRitual()" id="ritual-btn" class="mt-8 w-full py-7 bg-gradient-to-r from-yellow-400 via-orange-400 to-amber-500 text-black font-black text-3xl rounded-3xl active:scale-95 transition">
                         执行具身驱邪仪式
                     </button>
                 </div>
@@ -166,7 +192,7 @@
             <div class="md:col-span-3">
                 <div class="glass rounded-3xl p-5 flex flex-col h-full">
                     <h2 class="text-xl font-semibold mb-5">已净化数字资产</h2>
-                    <div id="asset-gallery" class="flex-1 grid grid-cols-2 gap-4"></div>
+                    <div id="asset-gallery" class="flex-1 flex flex-col gap-4"></div>
                     <div class="mt-auto pt-8">
                         <div class="text-xs text-white/50">仪式完成度</div>
                         <div class="h-3 bg-white/10 rounded-full mt-3 overflow-hidden">
@@ -179,7 +205,7 @@
         </div>
     </div>
 
-    <!-- 其余TAB -->
+    <!-- 其余TAB保持不变 -->
     <div id="tab-1" class="tab-content hidden"><div class="glass rounded-3xl p-4 max-w-6xl mx-auto"><img src="未标题-2-02.png" class="w-full rounded-3xl"><p class="text-center mt-4 text-xs opacity-75">一 · 传统文化</p></div></div>
     <div id="tab-2" class="tab-content hidden"><div class="glass rounded-3xl p-4 max-w-6xl mx-auto"><img src="未标题-2-03.png" class="w-full rounded-3xl"><p class="text-center mt-4 text-xs opacity-75">二 · 现代疫鬼调研</p></div></div>
     <div id="tab-3" class="tab-content hidden"><div class="glass rounded-3xl p-4 max-w-6xl mx-auto"><img src="未标题-1-04.jpg" class="w-full rounded-3xl"><p class="text-center mt-4 text-xs opacity-75">三 · 设计映射逻辑</p></div></div>
@@ -207,31 +233,48 @@
     </div>
 </div>
 
+<!-- 摇一摇专属特效叠加层（核心新增） -->
+<div id="shake-effect" class="hidden fixed inset-0 z-[70] flex items-center justify-center pointer-events-none">
+    <div class="relative scale-95">
+        <div id="shake-card" class="fancy-asset w-[340px] shadow-2xl" style="border-color: #bf77ff; background: linear-gradient(135deg, #4a2a80, #bf77ff);">
+            <div class="shine"></div>
+            <div class="flex-1 z-10">
+                <div class="font-bold text-2xl">对称纹样</div>
+                <div class="text-xs opacity-75">Symmetric Pattern</div>
+                <div class="text-xs mt-4 opacity-75">反馈机制产出</div>
+            </div>
+            <div class="z-10 text-right">
+                <div class="text-5xl font-black tracking-tighter">23.25</div>
+            </div>
+        </div>
+        <!-- 能量光环 -->
+        <div class="absolute -inset-8 border-4 border-purple-400/40 rounded-[2.5rem] animate-[ping_1.2s_ease-out_infinite]"></div>
+    </div>
+</div>
+
 <script>
     tailwind.config = { content: ["*"] }
    
     const ghosts = [
-        {id:0, name:"金嗜·吞秒", color:"#f2cc60", img:"9.png", desc:"日均屏幕时间6h40m|日均解锁144次", energy:35, action:0, asset:"金箔粒子"},
-        {id:1, name:"乱绒·唏蓝", color:"#00f2ff", img:"22.png", desc:"全球超3.01亿患者|33%成人经历严重压力", energy:30, action:1, asset:"全息面具"},
-        {id:2, name:"纠星·萦紫", color:"#bf77ff", img:"5.png", desc:"日产想法1.2万-6万（80%消极）|效率下降20%-40%", energy:20, action:2, asset:"对称纹样"},
-        {id:3, name:"匿鳞·银障", color:"#888888", img:"12.png", desc:"SAD影响1500万成人|超61%年轻人感到孤独", energy:15, action:3, asset:"治愈音色"}
+        {id:0, name:"金嗜·吞秒", color:"#f2cc60", img:"9.png", desc:"日均屏幕时间6h40m|日均解锁144次", action:0, asset:"金箔粒子",
+         extra:{en:"Gold Dust", score:"22.75", sub:"破碎与重建的能量"}},
+        {id:1, name:"乱绒·唏蓝", color:"#00f2ff", img:"22.png", desc:"全球超3.01亿患者|33%成人经历严重压力", action:1, asset:"全息面具",
+         extra:{en:"Holographic Mask", score:"22.75", sub:"自我完整重构"}},
+        {id:2, name:"纠星·萦紫", color:"#bf77ff", img:"5.png", desc:"日产想法1.2万-6万（80%消极）|效率下降20%-40%", action:2, asset:"对称纹样",
+         extra:{en:"Symmetric Pattern", score:"23.25", sub:"反馈机制产出"}},
+        {id:3, name:"匿鳞·银障", color:"#888888", img:"12.png", desc:"SAD影响1500万成人|超61%年轻人感到孤独", action:3, asset:"治愈音色",
+         extra:{en:"Healing Tone", score:"23.25", sub:"反馈机制产出"}}
     ]
    
     let currentGhost = 0, health = 100, purified = [], soundEnabled = true, currentTab = 0
     let lastX = 0, lastY = 0, lastZ = 0, shakeCooldown = 0
 
-    // ============== 动态修复顶部遮挡 ==============
     function adjustNavOffset() {
         const nav = document.getElementById('smart-nav')
         const main = document.getElementById('main-content')
         if (!nav || !main) return
-        const navHeight = nav.offsetHeight
-        main.style.paddingTop = (navHeight + 16) + 'px'  // +16px 留点呼吸空间
+        main.style.paddingTop = (nav.offsetHeight + 16) + 'px'
     }
-    window.addEventListener('resize', adjustNavOffset)
-    window.addEventListener('orientationchange', () => {
-        setTimeout(adjustNavOffset, 300)  // 横竖屏切换后延迟重新计算
-    })
 
     function createGhostCards() {
         const container = document.getElementById('ghost-list')
@@ -263,9 +306,7 @@
     function performAction(act) {
         const g = ghosts[currentGhost]
         const correct = g.action === act
-        
         if (navigator.vibrate) navigator.vibrate(correct ? [80, 40, 120] : [50])
-        
         if(soundEnabled){
             const ctx = new AudioContext()
             const osc = ctx.createOscillator()
@@ -274,7 +315,6 @@
             osc.start()
             setTimeout(()=>osc.stop(),90)
         }
-        
         if(correct){
             health = Math.max(health-28, 0)
             if(health<=0) defeatGhost()
@@ -287,7 +327,7 @@
         if (window.innerWidth <= 768) performAction(0)
     }
    
-    // ============== 新增：摇一摇交互（仅手机 + 仅仪式场） ==============
+    // 摇一摇处理 + 专属特效
     function handleShake(event) {
         if (currentTab !== 0) return
         const now = Date.now()
@@ -298,10 +338,11 @@
         
         const delta = Math.abs(accel.x - lastX) + Math.abs(accel.y - lastY) + Math.abs(accel.z - lastZ)
         
-        if (delta > 22) {  // 摇晃力度阈值（可根据手机灵敏度微调）
+        if (delta > 22) {
             shakeCooldown = now
             if (navigator.vibrate) navigator.vibrate([100, 50, 100])
-            performAction(2)  // 摇一摇触发“节律 / 踏步”（最有仪式感）
+            performAction(2)   // 摇一摇固定触发节律动作
+            showShakeEffect()  // 触发你图片里的对称纹样大特效
         }
         
         lastX = accel.x || 0
@@ -309,13 +350,39 @@
         lastZ = accel.z || 0
     }
    
+    // 摇一摇专属特效（精确复刻图片风格）
+    function showShakeEffect() {
+        const overlay = document.getElementById('shake-effect')
+        const card = document.getElementById('shake-card')
+        overlay.classList.remove('hidden')
+        card.style.animation = 'shake-flash 0.9s cubic-bezier(0.34,1.56,0.64,1)'
+        
+        setTimeout(() => {
+            overlay.classList.add('hidden')
+            card.style.animation = ''
+        }, 1600)
+    }
+   
     function defeatGhost() {
         purified.push(currentGhost)
         const gallery = document.getElementById('asset-gallery')
         const g = ghosts[currentGhost]
+        const extra = g.extra
+        
         const card = document.createElement('div')
-        card.className = 'glass rounded-2xl p-3 text-center'
-        card.innerHTML = `<img src="${g.img}" class="mx-auto w-14"><div class="font-medium text-xs mt-3">${g.asset}</div>`
+        card.className = `fancy-asset asset-${g.id} glass`
+        card.style.borderColor = g.color
+        card.innerHTML = `
+            <div class="shine"></div>
+            <div class="flex-1 z-10">
+                <div class="font-bold text-lg">${g.asset}</div>
+                <div class="text-xs opacity-75">${extra.en}</div>
+                <div class="text-xs mt-3 opacity-75">${extra.sub}</div>
+            </div>
+            <div class="z-10 text-right">
+                <div class="text-4xl font-black tracking-tighter">${extra.score}</div>
+            </div>
+        `
         gallery.appendChild(card)
        
         const prog = Math.round(purified.length/4*100)
@@ -343,7 +410,6 @@
         currentTab = n
         document.querySelectorAll('.tab-content').forEach(el=>el.classList.add('hidden'))
         document.getElementById('tab-'+n).classList.remove('hidden')
-        
         document.querySelectorAll('.tab-btn').forEach((b,i)=>i===n?b.classList.add('tab-active'):b.classList.remove('tab-active'))
         document.querySelectorAll('.bottom-tab').forEach(btn => {
             btn.classList.toggle('bottom-tab-active', parseInt(btn.dataset.tab) === n)
@@ -372,7 +438,6 @@
     function showAuthorInfo(){ document.getElementById('author-modal').classList.remove('hidden') }
     function hideAuthorModal(){ document.getElementById('author-modal').classList.add('hidden') }
    
-    // 智能导航隐藏
     let lastScrollY = 0
     const smartNav = document.getElementById('smart-nav')
     window.addEventListener('scroll', () => {
@@ -389,8 +454,10 @@
         createGhostCards()
         loadCurrentGhost()
         switchTab(0)
-        adjustNavOffset()           // 首次计算padding
-        window.addEventListener('devicemotion', handleShake)  // 开启摇一摇
+        adjustNavOffset()
+        window.addEventListener('resize', adjustNavOffset)
+        window.addEventListener('orientationchange', () => setTimeout(adjustNavOffset, 300))
+        window.addEventListener('devicemotion', handleShake)   // 摇一摇已开启
     }
 </script>
 </body>
